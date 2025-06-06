@@ -5,23 +5,50 @@
   <title>Sign Up</title>
   <style>
     body { font-family: Arial, sans-serif; }
-    form { max-width: 300px; margin: auto; padding: 1rem; }
-    label, input { display: block; width: 100%; margin-bottom: 0.5rem; }
-    input[type=submit] { margin-top: 1rem; }
+    .signup-form { max-width: 450px; margin: auto; padding: 1rem; }
+    .signup-form table { width: 100%; border-collapse: collapse; }
+    .signup-form td { padding: 0.25rem; }
+    .signup-form label { display:block; }
+    .signup-form input[type=text],
+    .signup-form input[type=email],
+    .signup-form input[type=password] {
+      width:100%;
+      padding:0.5rem;
+      border:1px solid #ccc;
+      border-radius:4px;
+    }
+    .signup-form input[type=submit] {
+      margin-top:1rem;
+      padding:0.5rem;
+    }
   </style>
 </head>
 <body>
   <h2 style="text-align:center;">Create Profile</h2>
-  <form method="post">
-    <label>First Name</label>
-    <input type="text" name="first_name" required>
-    <label>Last Name</label>
-    <input type="text" name="last_name" required>
-    <label>Email</label>
-    <input type="email" name="email" required>
-    <label>Password</label>
-    <input type="password" name="password" required>
-    <input type="submit" value="Sign Up">
+  <form method="post" class="signup-form">
+    <table class="signup-table">
+      <tr>
+        <td><label for="first_name_pg">First Name</label></td>
+        <td><input id="first_name_pg" type="text" name="first_name" required></td>
+      </tr>
+      <tr>
+        <td><label for="last_name_pg">Last Name</label></td>
+        <td><input id="last_name_pg" type="text" name="last_name" required></td>
+      </tr>
+      <tr>
+        <td><label for="email_pg">Email</label></td>
+        <td><input id="email_pg" type="email" name="email" required></td>
+      </tr>
+      <tr>
+        <td><label for="password_pg">Password</label></td>
+        <td><input id="password_pg" type="password" name="password" required></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="text-align:right;">
+          <input type="submit" value="Sign Up">
+        </td>
+      </tr>
+    </table>
   </form>
 </body>
 </html>

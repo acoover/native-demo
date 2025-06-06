@@ -39,6 +39,31 @@
       background: white;
       padding: 1rem;
       border-radius: 4px;
+      width: 450px;
+    }
+    .signup-form {
+      width: 100%;
+    }
+    .signup-form table { width: 100%; border-collapse: collapse; }
+    .signup-form td { padding: 0.25rem; }
+    .signup-form label { display: block; }
+    .signup-form input[type=text],
+    .signup-form input[type=email],
+    .signup-form input[type=password] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .signup-form input[type=submit] {
+      margin-top: 1rem;
+      padding: 0.5rem;
+    }
+    .package-row {
+      cursor: pointer;
+    }
+    .package-row.selected {
+      background: #f0f0f0;
     }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 0.5rem; border-bottom: 1px solid #ccc; text-align: center; }
@@ -57,7 +82,7 @@
     <button id="purchase-btn" class="purchase-btn">Purchase Coins</button>
     {% else %}
     <div style="flex:1;text-align:center;"></div>
-    <a href="{{ url_for('signup') }}" class="purchase-btn">Sign Up</a>
+    <button id="signup-btn" class="purchase-btn">Sign Up</button>
     {% endif %}
   </div>
   {% if user %}
@@ -70,7 +95,7 @@
   </div>
   {% else %}
   <div style="padding:1rem; text-align:center;">
-    Please <a href="{{ url_for('signup') }}">sign up</a> to start playing.
+    Please sign up to start playing.
   </div>
   {% endif %}
 
@@ -79,23 +104,80 @@
       <h3>Buy Coins</h3>
       <table>
         <tr><th>Sweep Coins</th><th>Gold Coins</th><th>Price (USD)</th></tr>
-        <tr><td>10</td><td>5</td><td>$4.99</td></tr>
-        <tr><td>25</td><td>12</td><td>$9.99</td></tr>
-        <tr><td>40</td><td>20</td><td>$14.99</td></tr>
+        <tr class="package-row"><td>10</td><td>5</td><td>$4.99</td></tr>
+        <tr class="package-row"><td>25</td><td>12</td><td>$9.99</td></tr>
+        <tr class="package-row"><td>40</td><td>20</td><td>$14.99</td></tr>
       </table>
-      <div style="text-align:right; margin-top:1rem;">
+      <div style="display:flex;justify-content:space-between;margin-top:1rem;">
+        <button id="purchase-confirm" class="purchase-btn" disabled>Purchase</button>
         <button id="close-modal" class="purchase-btn">Close</button>
       </div>
     </div>
   </div>
 
+  <div id="signup-modal" class="modal">
+    <div class="modal-content">
+      <h3>Create Profile</h3>
+      <form method="post" action="{{ url_for('signup') }}" class="signup-form">
+        <table class="signup-table">
+          <tr>
+            <td><label for="first_name">First Name</label></td>
+            <td><input id="first_name" type="text" name="first_name" required></td>
+          </tr>
+          <tr>
+            <td><label for="last_name">Last Name</label></td>
+            <td><input id="last_name" type="text" name="last_name" required></td>
+          </tr>
+          <tr>
+            <td><label for="email">Email</label></td>
+            <td><input id="email" type="email" name="email" required></td>
+          </tr>
+          <tr>
+            <td><label for="password">Password</label></td>
+            <td><input id="password" type="password" name="password" required></td>
+          </tr>
+          <tr>
+            <td colspan="2" style="text-align:right;">
+              <input type="submit" value="Sign Up">
+            </td>
+          </tr>
+        </table>
+      </form>
+      <div style="text-align:right; margin-top:1rem;">
+        <button id="close-signup-modal" class="purchase-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const btn = document.getElementById('purchase-btn');
-    const modal = document.getElementById('purchase-modal');
-    const closeBtn = document.getElementById('close-modal');
-    if (btn) btn.onclick = () => modal.style.display = 'flex';
-    if (closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
-    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+    const purchaseBtn = document.getElementById('purchase-btn');
+    const purchaseModal = document.getElementById('purchase-modal');
+    const purchaseClose = document.getElementById('close-modal');
+    const purchaseConfirm = document.getElementById('purchase-confirm');
+    const rows = document.querySelectorAll('#purchase-modal .package-row');
+    rows.forEach(r => r.addEventListener('click', () => {
+      rows.forEach(x => x.classList.remove('selected'));
+      r.classList.add('selected');
+      purchaseConfirm.disabled = false;
+    }));
+    if (purchaseBtn) purchaseBtn.onclick = () => purchaseModal.style.display = 'flex';
+    if (purchaseClose) purchaseClose.onclick = () => purchaseModal.style.display = 'none';
+    if (purchaseConfirm) purchaseConfirm.onclick = () => {
+      purchaseModal.style.display = 'none';
+      purchaseConfirm.disabled = true;
+      rows.forEach(x => x.classList.remove('selected'));
+    };
+
+    const signupBtn = document.getElementById('signup-btn');
+    const signupModal = document.getElementById('signup-modal');
+    const signupClose = document.getElementById('close-signup-modal');
+    if (signupBtn) signupBtn.onclick = () => signupModal.style.display = 'flex';
+    if (signupClose) signupClose.onclick = () => signupModal.style.display = 'none';
+
+    window.onclick = (e) => {
+      if (e.target === purchaseModal) purchaseModal.style.display = 'none';
+      if (e.target === signupModal) signupModal.style.display = 'none';
+    };
   </script>
 </body>
 </html>
