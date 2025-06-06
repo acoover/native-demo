@@ -57,18 +57,22 @@
     <button id="purchase-btn" class="purchase-btn">Purchase Coins</button>
     {% else %}
     <div style="flex:1;text-align:center;"></div>
-    <div></div>
+    <a href="{{ url_for('signup') }}" class="purchase-btn">Sign Up</a>
     {% endif %}
   </div>
   {% if user %}
   <p style="padding:1rem;">Welcome, {{ users[user]['first'] }}!</p>
-  {% endif %}
   <div class="games">
     <div class="game" style="background:#e74c3c;">Game 1</div>
     <div class="game" style="background:#3498db;">Game 2</div>
     <div class="game" style="background:#2ecc71;">Game 3</div>
     <div class="game" style="background:#9b59b6;">Game 4</div>
   </div>
+  {% else %}
+  <div style="padding:1rem; text-align:center;">
+    Please <a href="{{ url_for('signup') }}">sign up</a> to start playing.
+  </div>
+  {% endif %}
 
   <div id="purchase-modal" class="modal">
     <div class="modal-content">
