@@ -5,13 +5,58 @@
   <title>Sweeps Demo</title>
   <style>
     body { font-family: Arial, sans-serif; }
-    .header { background: #333; color: white; padding: 1rem; text-align: center; }
+    .header {
+      background: #333;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .title { font-weight: bold; }
+    .balance { flex: 1; text-align: center; }
+    .purchase-btn {
+      background: #fff;
+      color: #333;
+      padding: 0.5rem 1rem;
+      border: none;
+      cursor: pointer;
+    }
     .games { display: flex; gap: 1rem; padding: 1rem; }
     .game { flex: 1; height: 100px; color: white; display: flex; align-items: center; justify-content: center; }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 1rem;
+      border-radius: 4px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.5rem; border-bottom: 1px solid #ccc; text-align: center; }
   </style>
 </head>
 <body>
-  <div class="header">Sweeps Demo</div>
+  <div class="header">
+    <div class="title">Sweeps Demo</div>
+    {% if user %}
+    <div class="balance">
+      {{ users[user]['gold_coins'] }} Gold | {{ users[user]['sweep_coins'] }} Sweeps
+    </div>
+    <button id="purchase-btn" class="purchase-btn">Purchase Coins</button>
+    {% else %}
+    <div style="flex:1;text-align:center;"></div>
+    <div></div>
+    {% endif %}
+  </div>
   {% if user %}
   <p style="padding:1rem;">Welcome, {{ users[user]['first'] }}!</p>
   {% endif %}
@@ -21,5 +66,29 @@
     <div class="game" style="background:#2ecc71;">Game 3</div>
     <div class="game" style="background:#9b59b6;">Game 4</div>
   </div>
+
+  <div id="purchase-modal" class="modal">
+    <div class="modal-content">
+      <h3>Buy Coins</h3>
+      <table>
+        <tr><th>Sweep Coins</th><th>Gold Coins</th><th>Price (USD)</th></tr>
+        <tr><td>10</td><td>5</td><td>$4.99</td></tr>
+        <tr><td>25</td><td>12</td><td>$9.99</td></tr>
+        <tr><td>40</td><td>20</td><td>$14.99</td></tr>
+      </table>
+      <div style="text-align:right; margin-top:1rem;">
+        <button id="close-modal" class="purchase-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('purchase-btn');
+    const modal = document.getElementById('purchase-modal');
+    const closeBtn = document.getElementById('close-modal');
+    if (btn) btn.onclick = () => modal.style.display = 'flex';
+    if (closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+  </script>
 </body>
 </html>

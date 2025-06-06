@@ -4,6 +4,8 @@ app = Flask(__name__)
 app.secret_key = 'dev-secret-key'
 
 # in-memory storage of users
+# each user record stores first name, last name, password
+# and coin balances for gold and sweep coins
 users = {}
 
 @app.route('/')
@@ -22,6 +24,8 @@ def signup():
             'first': first,
             'last': last,
             'password': password,
+            'gold_coins': 0,
+            'sweep_coins': 0,
         }
         session['user'] = email
         return redirect(url_for('home'))
