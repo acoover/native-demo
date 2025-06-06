@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sign Up</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    form { max-width: 300px; margin: auto; padding: 1rem; }
+    label, input { display: block; width: 100%; margin-bottom: 0.5rem; }
+    input[type=submit] { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;">Create Profile</h2>
+  <form method="post">
+    <label>First Name</label>
+    <input type="text" name="first_name" required>
+    <label>Last Name</label>
+    <input type="text" name="last_name" required>
+    <label>Email</label>
+    <input type="email" name="email" required>
+    <label>Password</label>
+    <input type="password" name="password" required>
+    <input type="submit" value="Sign Up">
+  </form>
+</body>
+</html>
