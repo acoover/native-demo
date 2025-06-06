@@ -137,6 +137,7 @@ def purchase():
     }
 
     try:
+        app.logger.info("Authorizing payment")
         res = requests.post(
             f"{PUSH_SERVICE_URL}/authorize",
             headers={"Authorization": f"Bearer {PUSH_API_KEY}"},
