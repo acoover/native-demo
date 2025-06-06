@@ -155,6 +155,7 @@
           <button id="close-payment-modal" class="purchase-btn">Close</button>
         </div>
       </div>
+      <div id="purchase-result" style="display:none;text-align:center;margin-top:1rem;"></div>
     </div>
   </div>
 
@@ -204,6 +205,8 @@
     const secureDebitBtn = document.getElementById('secure-debit-btn');
     const closePaymentModal = document.getElementById('close-payment-modal');
     const paymentPurchaseBtn = document.getElementById('payment-purchase-btn');
+    const purchaseResult = document.getElementById('purchase-result');
+    const balanceDiv = document.querySelector('.balance');
     const rows = document.querySelectorAll('#package-table .package-row');
     let widget;
 
@@ -215,6 +218,8 @@
       purchaseStep.style.display = 'block';
       selectedPackage.textContent = '';
       document.getElementById('payment-container').innerHTML = '';
+      purchaseResult.style.display = 'none';
+      purchaseResult.textContent = '';
     }
 
     rows.forEach(r => r.addEventListener('click', () => {
@@ -253,14 +258,39 @@
 
     if (paymentPurchaseBtn) paymentPurchaseBtn.onclick = () => {
       if (!widget) return;
-      widget.tokenize()
-        .then(({token}) => {
-          console.log('Token received:', token);
-          // submit token to backend
+      const selected = document.querySelector('#package-table .selected');
+      if (!selected) return;
+      const sweeps = parseInt(selected.children[0].textContent, 10);
+      const gold = parseInt(selected.children[1].textContent, 10);
+      const price = parseFloat(selected.children[2].textContent.replace('$', ''));
+      widget
+        .tokenize()
+        .then(async ({ token }) => {
+          try {
+            const res = await fetch('/purchase', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token, amount: price, sweeps, gold }),
+            });
+            const data = await res.json();
+            paymentStep.style.display = 'none';
+            if (res.status === 200) {
+              purchaseResult.textContent = `Approved! Payment ID: ${data.id}`;
+              if (balanceDiv) {
+                balanceDiv.textContent = `${data.gold_coins} Gold | ${data.sweep_coins} Sweeps`;
+              }
+            } else {
+              purchaseResult.textContent = 'Payment declined';
+            }
+            purchaseResult.style.display = 'block';
+          } catch (e) {
+            purchaseResult.textContent = 'Payment request failed';
+            purchaseResult.style.display = 'block';
+            paymentStep.style.display = 'none';
+          }
         })
         .catch((err) => {
-          console.error('Tokenization error:', err.message);
-          // handle error
+          alert('Tokenization error: ' + err.message);
         });
     };
 

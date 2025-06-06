@@ -21,6 +21,9 @@ export PUSH_SERVICE_URL=http://localhost:8080  # default if unset
 export PUSH_API_KEY=<your api key>
 ```
 
+The `PUSH_SERVICE_URL` value is used for user registration, widget URL
+generation, and purchase authorization requests.
+
 If the push service request fails during signup, an error page will be
 displayed.
 

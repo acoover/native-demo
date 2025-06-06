@@ -108,6 +108,57 @@ def widget_url():
     except requests.RequestException:
         return jsonify({'error': 'failed to generate widget url'}), 502
 
+
+@app.route('/purchase', methods=['POST'])
+def purchase():
+    """Authorize payment token and update user balance."""
+    user_email = session.get('user')
+    if not user_email:
+        return jsonify({'error': 'not logged in'}), 401
+
+    user = users.get(user_email)
+    if not user:
+        return jsonify({'error': 'user not found'}), 404
+
+    data = request.get_json(force=True)
+    token = data.get('token')
+    amount = data.get('amount')  # dollars
+    sweeps = data.get('sweeps')
+    gold = data.get('gold')
+    if not token or amount is None:
+        return jsonify({'error': 'missing params'}), 400
+
+    payload = {
+        'amount': int(round(float(amount) * 100)),
+        'currency': 'USD',
+        'direction': 'cash_in',
+        'token': token,
+    }
+
+    try:
+        res = requests.post(
+            f"{PUSH_SERVICE_URL}/authorize",
+            headers={"Authorization": f"Bearer {PUSH_API_KEY}"},
+            json=payload,
+            timeout=5,
+        )
+        resp_data = res.json() if res.content else {}
+    except requests.RequestException:
+        return jsonify({'error': 'authorization request failed'}), 502
+
+    if res.status_code == 200:
+        if sweeps:
+            user['sweep_coins'] += int(sweeps)
+        if gold:
+            user['gold_coins'] += int(gold)
+        return jsonify({
+            'id': resp_data.get('id'),
+            'gold_coins': user['gold_coins'],
+            'sweep_coins': user['sweep_coins'],
+        })
+    else:
+        return jsonify({'status': 'declined'}), 401
+
 if __name__ == '__main__':
     app.run(debug=True, port=8081)
 
