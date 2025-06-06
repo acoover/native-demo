@@ -65,6 +65,21 @@
     .package-row.selected {
       background: #f0f0f0;
     }
+    .payment-option {
+      background: #eee;
+      color: #333;
+      padding: 0.5rem 1rem;
+      border: none;
+      cursor: pointer;
+      margin-right: 0.5rem;
+    }
+    .payment-option.primary {
+      background: #333;
+      color: #fff;
+    }
+    #payment-container {
+      height: 212px;
+    }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 0.5rem; border-bottom: 1px solid #ccc; text-align: center; }
     .header { background: #333; color: white; padding: 1rem; text-align: center; }
@@ -101,16 +116,44 @@
 
   <div id="purchase-modal" class="modal">
     <div class="modal-content">
-      <h3>Buy Coins</h3>
-      <table>
-        <tr><th>Sweep Coins</th><th>Gold Coins</th><th>Price (USD)</th></tr>
-        <tr class="package-row"><td>10</td><td>5</td><td>$4.99</td></tr>
-        <tr class="package-row"><td>25</td><td>12</td><td>$9.99</td></tr>
-        <tr class="package-row"><td>40</td><td>20</td><td>$14.99</td></tr>
-      </table>
-      <div style="display:flex;justify-content:space-between;margin-top:1rem;">
-        <button id="purchase-confirm" class="purchase-btn" disabled>Purchase</button>
-        <button id="close-modal" class="purchase-btn">Close</button>
+      <div id="purchase-step">
+        <h3>Buy Coins</h3>
+        <table id="package-table">
+          <tr><th>Sweep Coins</th><th>Gold Coins</th><th>Price (USD)</th></tr>
+          <tr class="package-row"><td>10</td><td>5</td><td>$4.99</td></tr>
+          <tr class="package-row"><td>25</td><td>12</td><td>$9.99</td></tr>
+          <tr class="package-row"><td>40</td><td>20</td><td>$14.99</td></tr>
+        </table>
+        <div style="display:flex;justify-content:space-between;margin-top:1rem;">
+          <button id="purchase-confirm" class="purchase-btn" disabled>Purchase</button>
+          <button id="close-modal" class="purchase-btn">Close</button>
+        </div>
+      </div>
+      <div id="payment-step" style="display:none;">
+        <h3>Select Payment Method</h3>
+        <div id="selected-package" style="margin-bottom:0.5rem;"></div>
+        <div style="margin-bottom:1rem;">
+          <button id="secure-debit-btn" class="payment-option primary">
+            <svg width="12" height="14" viewBox="0 0 12 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g opacity="0.95">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M5.79681 0.428367C5.92366 0.362419 6.07634 0.362419 6.20319 0.428367L11.7746 3.32495C11.9134 3.39712 12 3.53705 12 3.68928V4.93067C12 5.15921 11.8081 5.34447 11.5714 5.34447H0.428571C0.191878 5.34447 0 5.15921 0 4.93067V3.68928C0 3.53705 0.0865673 3.39712 0.225386 3.32495L5.79681 0.428367Z" fill="white"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M0.902389 10.1252C0.974985 9.98504 1.12338 9.89648 1.28571 9.89648H10.7143C10.8766 9.89648 11.025 9.98504 11.0976 10.1252L11.9548 11.7804C12.0212 11.9087 12.0141 12.061 11.936 12.183C11.8579 12.305 11.72 12.3793 11.5714 12.3793H0.428572C0.280039 12.3793 0.142096 12.305 0.0640072 12.183C-0.0140813 12.061 -0.0211801 11.9087 0.0452459 11.7804L0.902389 10.1252Z" fill="white"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M2.1839 4.51758C2.53896 4.51758 2.82679 4.70284 2.82679 4.93138V9.89694C2.82679 10.1255 2.53896 10.3107 2.1839 10.3107C1.82885 10.3107 1.54102 10.1255 1.54102 9.89694V4.93138C1.54102 4.70284 1.82885 4.51758 2.1839 4.51758Z" fill="white"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M4.75617 4.51758C5.11122 4.51758 5.39906 4.70284 5.39906 4.93138V9.89694C5.39906 10.1255 5.11122 10.3107 4.75617 10.3107C4.40111 10.3107 4.11328 10.1255 4.11328 9.89694V4.93138C4.11328 4.70284 4.40111 4.51758 4.75617 4.51758Z" fill="white"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M9.89777 4.51758C10.2528 4.51758 10.5407 4.70284 10.5407 4.93138V9.89694C10.5407 10.1255 10.2528 10.3107 9.89777 10.3107C9.54271 10.3107 9.25488 10.1255 9.25488 9.89694V4.93138C9.25488 4.70284 9.54271 4.51758 9.89777 4.51758Z" fill="white"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.3255 4.51758C7.68056 4.51758 7.96839 4.70284 7.96839 4.93138V9.89694C7.96839 10.1255 7.68056 10.3107 7.3255 10.3107C6.97045 10.3107 6.68262 10.1255 6.68262 9.89694V4.93138C6.68262 4.70284 6.97045 4.51758 7.3255 4.51758Z" fill="white"/>
+              </g>
+            </svg>
+            Secure Debit
+          </button>
+          <button class="payment-option">Credit</button>
+          <button class="payment-option">Bank Transfer</button>
+        </div>
+        <div id="payment-container"></div>
+        <div style="text-align:right;margin-top:1rem;">
+          <button id="payment-purchase-btn" class="purchase-btn">Purchase</button>
+          <button id="close-payment-modal" class="purchase-btn">Close</button>
+        </div>
       </div>
     </div>
   </div>
@@ -149,23 +192,76 @@
     </div>
   </div>
 
+  <script src="https://cdn.pushcash.com/sdk/push.umd.js"></script>
   <script>
     const purchaseBtn = document.getElementById('purchase-btn');
     const purchaseModal = document.getElementById('purchase-modal');
     const purchaseClose = document.getElementById('close-modal');
     const purchaseConfirm = document.getElementById('purchase-confirm');
-    const rows = document.querySelectorAll('#purchase-modal .package-row');
+    const purchaseStep = document.getElementById('purchase-step');
+    const paymentStep = document.getElementById('payment-step');
+    const selectedPackage = document.getElementById('selected-package');
+    const secureDebitBtn = document.getElementById('secure-debit-btn');
+    const closePaymentModal = document.getElementById('close-payment-modal');
+    const paymentPurchaseBtn = document.getElementById('payment-purchase-btn');
+    const rows = document.querySelectorAll('#package-table .package-row');
+    let widget;
+
+    function closeModal() {
+      purchaseModal.style.display = 'none';
+      purchaseConfirm.disabled = true;
+      rows.forEach(x => x.classList.remove('selected'));
+      paymentStep.style.display = 'none';
+      purchaseStep.style.display = 'block';
+      selectedPackage.textContent = '';
+      document.getElementById('payment-container').innerHTML = '';
+    }
+
     rows.forEach(r => r.addEventListener('click', () => {
       rows.forEach(x => x.classList.remove('selected'));
       r.classList.add('selected');
       purchaseConfirm.disabled = false;
     }));
+
     if (purchaseBtn) purchaseBtn.onclick = () => purchaseModal.style.display = 'flex';
-    if (purchaseClose) purchaseClose.onclick = () => purchaseModal.style.display = 'none';
+    if (purchaseClose) purchaseClose.onclick = closeModal;
+    if (closePaymentModal) closePaymentModal.onclick = closeModal;
+
     if (purchaseConfirm) purchaseConfirm.onclick = () => {
-      purchaseModal.style.display = 'none';
-      purchaseConfirm.disabled = true;
-      rows.forEach(x => x.classList.remove('selected'));
+      const selected = document.querySelector('#package-table .selected');
+      if (!selected) return;
+      const sweeps = selected.children[0].textContent;
+      const price = selected.children[2].textContent;
+      selectedPackage.textContent = sweeps + ' Sweeps - ' + price;
+      purchaseStep.style.display = 'none';
+      paymentStep.style.display = 'block';
+    };
+
+    if (secureDebitBtn) secureDebitBtn.onclick = async () => {
+      try {
+        const res = await fetch('/widget_url', {method: 'POST'});
+        if (!res.ok) throw new Error('request failed');
+        const data = await res.json();
+        widget = new window.PushCash.Widget({
+          selector: '#payment-container',
+          url: data.url,
+        });
+      } catch (e) {
+        alert('Failed to load payment widget');
+      }
+    };
+
+    if (paymentPurchaseBtn) paymentPurchaseBtn.onclick = () => {
+      if (!widget) return;
+      widget.tokenize()
+        .then(({token}) => {
+          console.log('Token received:', token);
+          // submit token to backend
+        })
+        .catch((err) => {
+          console.error('Tokenization error:', err.message);
+          // handle error
+        });
     };
 
     const signupBtn = document.getElementById('signup-btn');
@@ -175,7 +271,7 @@
     if (signupClose) signupClose.onclick = () => signupModal.style.display = 'none';
 
     window.onclick = (e) => {
-      if (e.target === purchaseModal) purchaseModal.style.display = 'none';
+      if (e.target === purchaseModal) closeModal();
       if (e.target === signupModal) signupModal.style.display = 'none';
     };
   </script>

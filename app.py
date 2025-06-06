@@ -2,7 +2,7 @@ import os
 import uuid
 
 import requests
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 
 app = Flask(__name__)
 app.secret_key = 'dev-secret-key'
@@ -83,6 +83,30 @@ def signup():
         session['user'] = email
         return redirect(url_for('home'))
     return render_template('signup.html')
+
+@app.route('/widget_url', methods=['POST'])
+def widget_url():
+    """Generate a PushCash widget URL for the logged in user."""
+    user_email = session.get('user')
+    if not user_email:
+        return jsonify({'error': 'not logged in'}), 401
+
+    user = users.get(user_email)
+    push_user_id = user.get('push_user_id') if user else None
+    if not push_user_id:
+        return jsonify({'error': 'missing push user id'}), 400
+
+    try:
+        res = requests.post(
+            f"{PUSH_SERVICE_URL}/user/{push_user_id}/url",
+            headers={"Authorization": f"Bearer {PUSH_API_KEY}"},
+            timeout=5,
+        )
+        res.raise_for_status()
+        data = res.json()
+        return jsonify({'url': data.get('url')})
+    except requests.RequestException:
+        return jsonify({'error': 'failed to generate widget url'}), 502
 
 if __name__ == '__main__':
     app.run(debug=True, port=8081)
