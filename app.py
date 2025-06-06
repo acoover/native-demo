@@ -62,7 +62,7 @@ def signup():
             data = res.json()
             push_user_id = data.get("id")
             if push_user_id:
-                app.logger.info("Created user with Push %s", push_user_id)
+                app.logger.info("Registered user with Push %s", push_user_id)
         except requests.RequestException:
             return (
                 render_template(
@@ -104,6 +104,7 @@ def widget_url():
         )
         res.raise_for_status()
         data = res.json()
+        app.logger.info("Generated widget URL from Push API")
         return jsonify({'url': data.get('url')})
     except requests.RequestException:
         return jsonify({'error': 'failed to generate widget url'}), 502
