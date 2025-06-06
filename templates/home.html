@@ -42,6 +42,9 @@
     }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 0.5rem; border-bottom: 1px solid #ccc; text-align: center; }
+    .header { background: #333; color: white; padding: 1rem; text-align: center; }
+    .games { display: flex; gap: 1rem; padding: 1rem; }
+    .game { flex: 1; height: 100px; color: white; display: flex; align-items: center; justify-content: center; }
   </style>
 </head>
 <body>
@@ -57,6 +60,10 @@
     <div></div>
     {% endif %}
   </div>
+  </style>
+</head>
+<body>
+  <div class="header">Sweeps Demo</div>
   {% if user %}
   <p style="padding:1rem;">Welcome, {{ users[user]['first'] }}!</p>
   {% endif %}
