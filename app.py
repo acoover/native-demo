@@ -15,6 +15,8 @@ PUSH_API_KEY = os.getenv('PUSH_API_KEY', '')
 # each user record stores first name, last name, password
 # and coin balances for gold and sweep coins
 users = {}
+# store purchases waiting on auth intent completion
+pending_intents = {}
 
 @app.route('/')
 def home():
@@ -158,8 +160,54 @@ def purchase():
             'gold_coins': user['gold_coins'],
             'sweep_coins': user['sweep_coins'],
         })
+    elif res.status_code == 202:
+        intent_id = resp_data.get('intent_id')
+        if intent_id:
+            pending_intents[intent_id] = {
+                'user': user_email,
+                'sweeps': int(sweeps or 0),
+                'gold': int(gold or 0),
+            }
+        return jsonify({'url': resp_data.get('url'), 'intent_id': intent_id}), 202
     else:
         return jsonify({'status': 'declined'}), 401
+
+
+@app.route('/intent/<intent_id>')
+def intent_status(intent_id):
+    """Check status of an authorization intent and update balance if approved."""
+    info = pending_intents.get(intent_id)
+    if not info:
+        return jsonify({'error': 'unknown intent'}), 404
+    try:
+        res = requests.get(
+            f"{PUSH_SERVICE_URL}/intent/{intent_id}",
+            headers={"Authorization": f"Bearer {PUSH_API_KEY}"},
+            timeout=5,
+        )
+        res.raise_for_status()
+        data = res.json()
+    except requests.RequestException:
+        return jsonify({'error': 'failed to fetch intent status'}), 502
+
+    status = data.get('status')
+    user = users.get(info['user'])
+    if status == 'approved' and user:
+        user['sweep_coins'] += info['sweeps']
+        user['gold_coins'] += info['gold']
+        pending_intents.pop(intent_id, None)
+        return jsonify({
+            'status': 'approved',
+            'gold_coins': user['gold_coins'],
+            'sweep_coins': user['sweep_coins'],
+        })
+
+    if status in ['declined', 'canceled']:
+        pending_intents.pop(intent_id, None)
+        return jsonify({'status': 'declined'})
+
+    # pending
+    return jsonify({'status': 'pending'})
 
 if __name__ == '__main__':
     app.run(debug=True, port=8081)
