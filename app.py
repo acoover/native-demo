@@ -161,13 +161,15 @@ def purchase():
             'sweep_coins': user['sweep_coins'],
         })
     elif res.status_code == 202:
-        intent_id = resp_data.get('intent_id')
+        intent_id = resp_data.get('id')
         if intent_id:
             pending_intents[intent_id] = {
                 'user': user_email,
                 'sweeps': int(sweeps or 0),
                 'gold': int(gold or 0),
             }
+        else:
+            return jsonify({'error': 'missing intent id'}), 400
         return jsonify({'url': resp_data.get('url'), 'intent_id': intent_id}), 202
     else:
         return jsonify({'status': 'declined'}), 401

@@ -324,6 +324,7 @@
     };
 
     window.addEventListener('message', async (e) => {
+      console.log('message', e);
       if (authModal.style.display !== 'flex') return;
       const intentId = e.data && e.data.intent_id;
       if (!intentId) return;
