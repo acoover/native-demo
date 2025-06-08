@@ -211,6 +211,12 @@ def intent_status(intent_id):
     # pending
     return jsonify({'status': 'pending'})
 
+
+@app.route('/debug')
+def debug_view():
+    """Display current in-memory database contents for debugging."""
+    return render_template('debug.html', users=users, pending_intents=pending_intents)
+
 if __name__ == '__main__':
     app.run(debug=True, port=8081)
 

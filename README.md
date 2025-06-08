@@ -28,3 +28,9 @@ If the push service request fails during signup, an error page will be
 displayed.
 
 Then visit `http://localhost:5000/signup` to create a user profile.
+
+## Debugging
+
+A simple debug view is available at `http://localhost:5000/debug` which
+displays the current contents of the in-memory user and pending intent
+databases.

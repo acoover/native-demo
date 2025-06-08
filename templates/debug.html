@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Debug View</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 1rem; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; }
+    th, td { padding: 0.5rem; border: 1px solid #ccc; text-align: left; }
+  </style>
+</head>
+<body>
+  <h2>Users</h2>
+  <table>
+    <tr>
+      <th>Email</th>
+      <th>First</th>
+      <th>Last</th>
+      <th>Gold Coins</th>
+      <th>Sweep Coins</th>
+      <th>Push User ID</th>
+    </tr>
+    {% for email, info in users.items() %}
+    <tr>
+      <td>{{ email }}</td>
+      <td>{{ info['first'] }}</td>
+      <td>{{ info['last'] }}</td>
+      <td>{{ info['gold_coins'] }}</td>
+      <td>{{ info['sweep_coins'] }}</td>
+      <td>{{ info['push_user_id'] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <h2>Pending Intents</h2>
+  <table>
+    <tr>
+      <th>Intent ID</th>
+      <th>User</th>
+      <th>Sweeps</th>
+      <th>Gold</th>
+    </tr>
+    {% for intent_id, info in pending_intents.items() %}
+    <tr>
+      <td>{{ intent_id }}</td>
+      <td>{{ info['user'] }}</td>
+      <td>{{ info['sweeps'] }}</td>
+      <td>{{ info['gold'] }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p><a href="{{ url_for('home') }}">Return Home</a></p>
+</body>
+</html>
