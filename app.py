@@ -99,16 +99,21 @@ def widget_url():
         return jsonify({'error': 'missing push user id'}), 400
 
     try:
+        app.logger.debug(f"Requesting widget URL for user {push_user_id}")
         res = requests.post(
             f"{PUSH_SERVICE_URL}/user/{push_user_id}/url",
             headers={"Authorization": f"Bearer {PUSH_API_KEY}"},
             timeout=5,
         )
+        app.logger.debug(f"Widget URL response status: {res.status_code}")
+        app.logger.debug(f"Widget URL response content: {res.content}")
         res.raise_for_status()
         data = res.json()
+        app.logger.debug(f"Widget URL response data: {data}")
         app.logger.info("Generated widget URL from Push API")
         return jsonify({'url': data.get('url')})
-    except requests.RequestException:
+    except requests.RequestException as e:
+        app.logger.error(f"Failed to generate widget URL: {str(e)}")
         return jsonify({'error': 'failed to generate widget url'}), 502
 
 
@@ -140,14 +145,19 @@ def purchase():
 
     try:
         app.logger.info("Authorizing payment")
+        app.logger.debug(f"Payment payload: {payload}")
         res = requests.post(
             f"{PUSH_SERVICE_URL}/authorize",
             headers={"Authorization": f"Bearer {PUSH_API_KEY}"},
             json=payload,
             timeout=5,
         )
+        app.logger.debug(f"Payment response status: {res.status_code}")
+        app.logger.debug(f"Payment response content: {res.content}")
         resp_data = res.json() if res.content else {}
-    except requests.RequestException:
+        app.logger.debug(f"Payment response data: {resp_data}")
+    except requests.RequestException as e:
+        app.logger.error(f"Payment authorization failed: {str(e)}")
         return jsonify({'error': 'authorization request failed'}), 502
 
     if res.status_code == 200:
@@ -182,14 +192,18 @@ def intent_status(intent_id):
     if not info:
         return jsonify({'error': 'unknown intent'}), 404
     try:
+        app.logger.info(f"Fetching status for intent {intent_id}")
         res = requests.get(
             f"{PUSH_SERVICE_URL}/intent/{intent_id}",
             headers={"Authorization": f"Bearer {PUSH_API_KEY}"},
             timeout=5,
         )
+        app.logger.debug(f"Intent status response: {res.status_code}")
         res.raise_for_status()
         data = res.json()
-    except requests.RequestException:
+        app.logger.debug(f"Intent status data: {data}")
+    except requests.RequestException as e:
+        app.logger.error(f"Failed to fetch intent status: {str(e)}")
         return jsonify({'error': 'failed to fetch intent status'}), 502
 
     status = data.get('status')
