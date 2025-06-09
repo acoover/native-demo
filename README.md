@@ -14,12 +14,16 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Set the following environment variables to configure the push user service:
+Create a `.env` file or set the following environment variables to configure
+the push user service:
 
 ```
 export PUSH_SERVICE_URL=http://localhost:8080  # default if unset
 export PUSH_API_KEY=<your api key>
 ```
+
+Environment variables defined in a `.env` file will be automatically loaded
+when the application starts.
 
 The `PUSH_SERVICE_URL` value is used for user registration, widget URL
 generation, and purchase authorization requests.

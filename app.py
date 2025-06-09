@@ -2,7 +2,11 @@ import os
 import uuid
 
 import requests
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+
+
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = 'dev-secret-key'
@@ -51,6 +55,7 @@ def signup():
         }
 
         try:
+            app.logger.debug(f"Registering user with Push service: {payload}")
             res = requests.post(
                 f"{PUSH_SERVICE_URL}/user",
                 headers={
@@ -60,8 +65,11 @@ def signup():
                 json=payload,
                 timeout=5,
             )
+            app.logger.debug(f"Push registration response status: {res.status_code}")
+            app.logger.debug(f"Push registration response content: {res.content}")
             res.raise_for_status()
             data = res.json()
+            app.logger.debug(f"Push registration response data: {data}")
             push_user_id = data.get("id")
             if push_user_id:
                 app.logger.info("Registered user with Push %s", push_user_id)
