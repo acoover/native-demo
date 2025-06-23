@@ -15,6 +15,9 @@ app.secret_key = 'dev-secret-key'
 PUSH_SERVICE_URL = os.getenv('PUSH_SERVICE_URL', 'http://localhost:8080')
 PUSH_API_KEY = os.getenv('PUSH_API_KEY', '')
 
+# conversion rate of gold coins to USD
+GOLD_TO_USD = 1.0
+
 # in-memory storage of users
 # each user record stores first name, last name, password
 # and coin balances for gold and sweep coins
@@ -185,6 +188,73 @@ def purchase():
                 'user': user_email,
                 'sweeps': int(sweeps or 0),
                 'gold': int(gold or 0),
+            }
+        else:
+            return jsonify({'error': 'missing intent id'}), 400
+        return jsonify({'url': resp_data.get('url'), 'intent_id': intent_id}), 202
+    else:
+        return jsonify({'status': 'declined'}), 401
+
+
+@app.route('/redeem', methods=['POST'])
+def redeem():
+    """Redeem gold coins for cash_out using Push"""
+    user_email = session.get('user')
+    if not user_email:
+        return jsonify({'error': 'not logged in'}), 401
+
+    user = users.get(user_email)
+    if not user:
+        return jsonify({'error': 'user not found'}), 404
+
+    data = request.get_json(force=True)
+    token = data.get('token')
+    gold = data.get('gold')
+    if not token or gold is None:
+        return jsonify({'error': 'missing params'}), 400
+
+    gold = int(gold)
+    if gold <= 0 or gold > user['gold_coins']:
+        return jsonify({'error': 'invalid amount'}), 400
+
+    payload = {
+        'amount': int(round(gold * GOLD_TO_USD * 100)),
+        'currency': 'USD',
+        'direction': 'cash_out',
+        'token': token,
+    }
+
+    try:
+        app.logger.info("Authorizing redemption")
+        app.logger.debug(f"Redemption payload: {payload}")
+        res = requests.post(
+            f"{PUSH_SERVICE_URL}/authorize",
+            headers={"Authorization": f"Bearer {PUSH_API_KEY}"},
+            json=payload,
+            timeout=5,
+        )
+        app.logger.debug(f"Redemption response status: {res.status_code}")
+        app.logger.debug(f"Redemption response content: {res.content}")
+        resp_data = res.json() if res.content else {}
+        app.logger.debug(f"Redemption response data: {resp_data}")
+    except requests.RequestException as e:
+        app.logger.error(f"Redemption request failed: {str(e)}")
+        return jsonify({'error': 'authorization request failed'}), 502
+
+    if res.status_code == 200:
+        user['gold_coins'] -= gold
+        return jsonify({
+            'id': resp_data.get('id'),
+            'gold_coins': user['gold_coins'],
+            'sweep_coins': user['sweep_coins'],
+        })
+    elif res.status_code == 202:
+        intent_id = resp_data.get('id')
+        if intent_id:
+            pending_intents[intent_id] = {
+                'user': user_email,
+                'sweeps': 0,
+                'gold': -gold,
             }
         else:
             return jsonify({'error': 'missing intent id'}), 400

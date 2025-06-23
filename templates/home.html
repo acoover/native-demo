@@ -109,6 +109,7 @@
       {{ users[user]['gold_coins'] }} Gold | {{ users[user]['sweep_coins'] }} Sweeps
     </div>
     <button id="purchase-btn" class="purchase-btn">Purchase Coins</button>
+    <button id="redeem-btn" class="purchase-btn">Redeem Coins</button>
     {% else %}
     <div style="flex:1;text-align:center;"></div>
     <button id="signup-btn" class="purchase-btn">Sign Up</button>
@@ -173,6 +174,28 @@
     </div>
   </div>
 
+  <div id="redeem-modal" class="modal">
+    <div class="modal-content">
+      <div id="redeem-step">
+        <h3>Redeem Gold Coins</h3>
+        <label for="redeem-amount">Gold Coins</label>
+        <input id="redeem-amount" type="number" min="1" style="width:100%;margin-bottom:1rem;">
+        <div style="text-align:right;">
+          <button id="redeem-next" class="purchase-btn">Continue</button>
+          <button id="close-redeem-modal" class="purchase-btn">Close</button>
+        </div>
+      </div>
+      <div id="redeem-widget-step" style="display:none;">
+        <div id="redeem-container"></div>
+        <div style="text-align:right;margin-top:1rem;">
+          <button id="redeem-submit" class="purchase-btn">Redeem</button>
+          <button id="close-redeem-widget" class="purchase-btn">Close</button>
+        </div>
+      </div>
+      <div id="redeem-result" style="display:none;text-align:center;margin-top:1rem;"></div>
+    </div>
+  </div>
+
   <div id="auth-modal" class="modal">
     <div class="auth-content">
       <iframe id="auth-frame" class="auth-frame"></iframe>
@@ -230,7 +253,19 @@
     const rows = document.querySelectorAll('#package-table .package-row');
     const authModal = document.getElementById('auth-modal');
     const authFrame = document.getElementById('auth-frame');
+    const redeemBtn = document.getElementById('redeem-btn');
+    const redeemModal = document.getElementById('redeem-modal');
+    const redeemNext = document.getElementById('redeem-next');
+    const closeRedeemModal = document.getElementById('close-redeem-modal');
+    const redeemWidgetStep = document.getElementById('redeem-widget-step');
+    const redeemStep = document.getElementById('redeem-step');
+    const redeemContainer = document.getElementById('redeem-container');
+    const redeemSubmit = document.getElementById('redeem-submit');
+    const closeRedeemWidget = document.getElementById('close-redeem-widget');
+    const redeemResult = document.getElementById('redeem-result');
+    const redeemAmountInput = document.getElementById('redeem-amount');
     let widget;
+    let currentFlow = null;
 
     function closeModal() {
       purchaseModal.style.display = 'none';
@@ -244,6 +279,16 @@
       purchaseResult.textContent = '';
     }
 
+    function closeRedeem() {
+      redeemModal.style.display = 'none';
+      redeemWidgetStep.style.display = 'none';
+      redeemStep.style.display = 'block';
+      redeemAmountInput.value = '';
+      redeemContainer.innerHTML = '';
+      redeemResult.style.display = 'none';
+      redeemResult.textContent = '';
+    }
+
     rows.forEach(r => r.addEventListener('click', () => {
       rows.forEach(x => x.classList.remove('selected'));
       r.classList.add('selected');
@@ -253,6 +298,9 @@
     if (purchaseBtn) purchaseBtn.onclick = () => purchaseModal.style.display = 'flex';
     if (purchaseClose) purchaseClose.onclick = closeModal;
     if (closePaymentModal) closePaymentModal.onclick = closeModal;
+    if (redeemBtn) redeemBtn.onclick = () => redeemModal.style.display = 'flex';
+    if (closeRedeemModal) closeRedeemModal.onclick = closeRedeem;
+    if (closeRedeemWidget) closeRedeemWidget.onclick = closeRedeem;
 
     if (purchaseConfirm) purchaseConfirm.onclick = () => {
       const selected = document.querySelector('#package-table .selected');
@@ -262,6 +310,24 @@
       selectedPackage.textContent = sweeps + ' Sweeps - ' + price;
       purchaseStep.style.display = 'none';
       paymentStep.style.display = 'block';
+    };
+
+    if (redeemNext) redeemNext.onclick = async () => {
+      const amt = parseInt(redeemAmountInput.value, 10);
+      if (!amt) return;
+      try {
+        const res = await fetch('/widget_url', {method: 'POST'});
+        if (!res.ok) throw new Error('request failed');
+        const data = await res.json();
+        widget = new window.PushCash.Widget({
+          selector: '#redeem-container',
+          url: data.url,
+        });
+        redeemStep.style.display = 'none';
+        redeemWidgetStep.style.display = 'block';
+      } catch (e) {
+        alert('Failed to load payment widget');
+      }
     };
 
     if (secureDebitBtn) secureDebitBtn.onclick = async () => {
@@ -305,6 +371,7 @@
             } else if (res.status === 202) {
               authFrame.src = data.url;
               authModal.style.display = 'flex';
+              currentFlow = 'purchase';
             } else {
               purchaseResult.textContent = 'Payment declined';
               purchaseResult.style.display = 'block';
@@ -320,6 +387,46 @@
         });
     };
 
+    if (redeemSubmit) redeemSubmit.onclick = () => {
+      if (!widget) return;
+      const amount = parseInt(redeemAmountInput.value, 10);
+      if (!amount) return;
+      widget
+        .tokenize()
+        .then(async ({ token }) => {
+          try {
+            const res = await fetch('/redeem', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token, gold: amount }),
+            });
+            const data = await res.json();
+            redeemWidgetStep.style.display = 'none';
+            if (res.status === 200) {
+              redeemResult.textContent = `Redeemed! Payment ID: ${data.id}`;
+              if (balanceDiv) {
+                balanceDiv.textContent = `${data.gold_coins} Gold | ${data.sweep_coins} Sweeps`;
+              }
+              redeemResult.style.display = 'block';
+            } else if (res.status === 202) {
+              authFrame.src = data.url;
+              authModal.style.display = 'flex';
+              currentFlow = 'redeem';
+            } else {
+              redeemResult.textContent = 'Redemption declined';
+              redeemResult.style.display = 'block';
+            }
+          } catch (e) {
+            redeemResult.textContent = 'Redemption request failed';
+            redeemResult.style.display = 'block';
+            redeemWidgetStep.style.display = 'none';
+          }
+        })
+        .catch((err) => {
+          alert('Tokenization error: ' + err.message);
+        });
+    };
+
     window.addEventListener('message', async (e) => {
       if (authModal.style.display !== 'flex') return;
       const intentId = e.data && e.data.intent_id;
@@ -328,18 +435,20 @@
       try {
         const res = await fetch(`/intent/${intentId}`);
         const data = await res.json();
+        const resultEl = currentFlow === 'redeem' ? redeemResult : purchaseResult;
         if (res.ok && data.status === 'approved') {
-          purchaseResult.textContent = 'Approved!';
+          resultEl.textContent = 'Approved!';
           if (balanceDiv) {
             balanceDiv.textContent = `${data.gold_coins} Gold | ${data.sweep_coins} Sweeps`;
           }
         } else {
-          purchaseResult.textContent = 'Payment declined';
+          resultEl.textContent = 'Payment declined';
         }
-        purchaseResult.style.display = 'block';
+        resultEl.style.display = 'block';
       } catch (err) {
-        purchaseResult.textContent = 'Payment verification failed';
-        purchaseResult.style.display = 'block';
+        const resultEl = currentFlow === 'redeem' ? redeemResult : purchaseResult;
+        resultEl.textContent = 'Payment verification failed';
+        resultEl.style.display = 'block';
       }
     });
 
@@ -351,6 +460,7 @@
 
     window.onclick = (e) => {
       if (e.target === purchaseModal) closeModal();
+      if (e.target === redeemModal) closeRedeem();
       if (e.target === signupModal) signupModal.style.display = 'none';
       if (e.target === authModal) authModal.style.display = 'none';
     };
