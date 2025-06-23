@@ -9,32 +9,22 @@ of displaying the game grid.
 
 ## Running
 
+Install requirements for python using pip
 ```bash
 pip install -r requirements.txt
-python app.py
 ```
 
-Create a `.env` file or set the following environment variables to configure
-the push user service:
-
+Create a `.env` file with the URL and API key for Push Cash sandbox
 ```
-export PUSH_SERVICE_URL=http://localhost:8080  # default if unset
-export PUSH_API_KEY=<your api key>
+PUSH_SERVICE_URL=https://sandbox.pushcash.com
+PUSH_API_KEY=<your api key>
 ```
 
-Environment variables defined in a `.env` file will be automatically loaded
-when the application starts.
+Then visit `http://127.0.0.1:8081/` to signup and perform test payments.
 
-The `PUSH_SERVICE_URL` value is used for user registration, widget URL
-generation, and purchase authorization requests.
-
-If the push service request fails during signup, an error page will be
-displayed.
-
-Then visit `http://localhost:5000/signup` to create a user profile.
+- Use `5555 5555 5555 4444` for your test-card credentials
+- Use `mxuser` and `password` to complete bank authentication
 
 ## Debugging
 
-A simple debug view is available at `http://localhost:5000/debug` which
-displays the current contents of the in-memory user and pending intent
-databases.
+A simple debug view is available at `http://localhost:8081/debug` which displays the current contents of the in-memory database
