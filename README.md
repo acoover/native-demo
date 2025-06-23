@@ -1,11 +1,6 @@
 # Native Demo
 
-A minimal Flask webapp demonstrating a signup flow and simple homepage.
-
-The home page shows a fake coin balance for each user and a button to
-"Purchase Coins" which opens a modal displaying example coin packages.
-If you are not logged in, the home page will prompt you to sign up instead
-of displaying the game grid.
+A minimal Flask webapp demonstrating the Push Native [integration](https://docs.pushcash.com/integration) on a demo Social Sweeps application.
 
 ## Running
 
