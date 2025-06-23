@@ -28,6 +28,9 @@ pending_intents = {}
 @app.route('/')
 def home():
     user = session.get('user')
+    if user and user not in users:
+        session.pop('user', None)
+        user = None
     return render_template('home.html', user=user, users=users)
 
 @app.route('/signup', methods=['GET', 'POST'])
