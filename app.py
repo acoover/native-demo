@@ -112,11 +112,21 @@ def widget_url():
     if not push_user_id:
         return jsonify({'error': 'missing push user id'}), 400
 
+    data = request.get_json(force=True)
+    direction = data.get('direction')
+    if not direction or direction not in ['cash_in', 'cash_out']:
+        return jsonify({'error': 'missing or invalid direction parameter'}), 400
+
+    payload = {
+        'direction': direction
+    }
+
     try:
-        app.logger.debug(f"Requesting widget URL for user {push_user_id}")
+        app.logger.debug(f"Requesting widget URL for user {push_user_id} with direction {direction}")
         res = requests.post(
             f"{PUSH_SERVICE_URL}/user/{push_user_id}/url",
             headers={"Authorization": f"Bearer {PUSH_API_KEY}"},
+            json=payload,
             timeout=5,
         )
         app.logger.debug(f"Widget URL response status: {res.status_code}")

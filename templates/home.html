@@ -319,7 +319,11 @@
       const amt = parseInt(redeemAmountInput.value, 10);
       if (!amt) return;
       try {
-        const res = await fetch('/widget_url', {method: 'POST'});
+        const res = await fetch('/widget_url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ direction: 'cash_out' })
+        });
         if (!res.ok) throw new Error('request failed');
         const data = await res.json();
         widget = new window.PushCash.Widget({
@@ -335,7 +339,11 @@
 
     if (secureDebitBtn) secureDebitBtn.onclick = async () => {
       try {
-        const res = await fetch('/widget_url', {method: 'POST'});
+        const res = await fetch('/widget_url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ direction: 'cash_in' })
+        });
         if (!res.ok) throw new Error('request failed');
         const data = await res.json();
         widget = new window.PushCash.Widget({
