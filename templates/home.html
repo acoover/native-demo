@@ -355,6 +355,28 @@
       }
     };
 
+    const creditBtn = document.querySelector('.payment-option:nth-child(2)');
+    if (creditBtn) creditBtn.onclick = async () => {
+      try {
+        const res = await fetch('/widget_url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            direction: 'cash_in',
+            type: 'card_only',
+          })
+        });
+        if (!res.ok) throw new Error('request failed');
+        const data = await res.json();
+        widget = new window.PushCash.Widget({
+          selector: '#payment-container',
+          url: data.url,
+        });
+      } catch (e) {
+        alert('Failed to load payment widget');
+      }
+    };
+
     if (paymentPurchaseBtn) paymentPurchaseBtn.onclick = () => {
       if (!widget) return;
       const selected = document.querySelector('#package-table .selected');
