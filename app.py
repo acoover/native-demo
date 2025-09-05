@@ -234,6 +234,7 @@ def redeem():
         'amount': int(round(gold * GOLD_TO_USD * 100)),
         'currency': 'USD',
         'direction': 'cash_out',
+        'approval_mode': 'manual',
         'token': token,
     }
 
