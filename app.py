@@ -120,6 +120,10 @@ def widget_url():
     payload = {
         'direction': direction
     }
+    
+    widget_type = data.get('type')
+    if widget_type:
+        payload['type'] = widget_type
 
     try:
         app.logger.debug(f"Requesting widget URL for user {push_user_id} with direction {direction}")
